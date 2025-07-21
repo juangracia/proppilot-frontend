@@ -17,6 +17,7 @@ import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider'
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns'
 import PropertyUnitsList from './components/PropertyUnitsList'
 import PaymentForm from './components/PaymentForm'
+import TenantsList from './components/TenantsList'
 import { LanguageProvider, useLanguage } from './contexts/LanguageContext'
 import LanguageCurrencySelector from './components/LanguageCurrencySelector'
 import './App.css'
@@ -94,6 +95,7 @@ function AppContent() {
             <Tabs value={tabValue} onChange={handleTabChange} aria-label="PropPilot tabs">
               <Tab label={t('propertyUnits')} />
               <Tab label={t('registerPayment')} />
+              <Tab label={t('tenants')} />
             </Tabs>
           </Box>
           <TabPanel value={tabValue} index={0}>
@@ -101,6 +103,9 @@ function AppContent() {
           </TabPanel>
           <TabPanel value={tabValue} index={1}>
             <PaymentForm />
+          </TabPanel>
+          <TabPanel value={tabValue} index={2}>
+            <TenantsList />
           </TabPanel>
         </Box>
       </LocalizationProvider>
