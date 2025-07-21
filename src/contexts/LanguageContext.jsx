@@ -23,6 +23,7 @@ export const LanguageProvider = ({ children }) => {
       // Tabs
       propertyUnits: 'UNIDADES DE PROPIEDAD',
       registerPayment: 'REGISTRAR PAGO',
+      tenants: 'INQUILINOS',
       
       // Property List
       propertyUnitsTitle: 'Unidades de Propiedad',
@@ -69,6 +70,48 @@ export const LanguageProvider = ({ children }) => {
       loading: 'Cargando...',
       errorOccurred: 'Ocurrió un error',
       
+      // Tenant Management
+      tenantsTitle: 'Inquilinos',
+      addTenant: 'AGREGAR INQUILINO',
+      editTenant: 'EDITAR INQUILINO',
+      deleteTenant: 'ELIMINAR INQUILINO',
+      fullName: 'Nombre Completo',
+      nationalId: 'DNI/CUIT',
+      email: 'Email',
+      phone: 'Teléfono',
+      actions: 'Acciones',
+      edit: 'Editar',
+      delete: 'Eliminar',
+      save: 'GUARDAR',
+      addNewTenant: 'Agregar Nuevo Inquilino',
+      editTenantTitle: 'Editar Inquilino',
+      fullNameLabel: 'Nombre Completo',
+      fullNamePlaceholder: 'Ej: Juan Carlos Pérez',
+      nationalIdLabel: 'DNI/CUIT',
+      nationalIdPlaceholder: 'Ej: 12345678',
+      emailLabel: 'Email',
+      emailPlaceholder: 'Ej: juan.perez@email.com',
+      phoneLabel: 'Teléfono',
+      phonePlaceholder: 'Ej: +54 9 11 1234-5678',
+      confirmDelete: '¿Estás seguro de que deseas eliminar este inquilino?',
+      confirmDeleteMessage: 'Esta acción no se puede deshacer.',
+      tenantCreatedSuccess: '¡Inquilino creado exitosamente!',
+      tenantUpdatedSuccess: '¡Inquilino actualizado exitosamente!',
+      tenantDeletedSuccess: '¡Inquilino eliminado exitosamente!',
+      failedToCreateTenant: 'Error al crear el inquilino',
+      failedToUpdateTenant: 'Error al actualizar el inquilino',
+      failedToDeleteTenant: 'Error al eliminar el inquilino',
+      duplicateNationalId: 'Ya existe un inquilino con este DNI/CUIT',
+      duplicateEmail: 'Ya existe un inquilino con este email',
+      totalTenants: 'Total: {count} inquilino{plural}',
+      
+      // Property Management
+      deleteProperty: 'ELIMINAR PROPIEDAD',
+      confirmDeleteProperty: '¿Estás seguro de que deseas eliminar esta propiedad?',
+      confirmDeletePropertyMessage: 'Esta acción no se puede deshacer.',
+      propertyDeletedSuccess: '¡Propiedad eliminada exitosamente!',
+      failedToDeleteProperty: 'Error al eliminar la propiedad',
+      
       // Payment Form
       registerPaymentTitle: 'Registrar Pago',
       propertyUnitLabel: 'Unidad de Propiedad',
@@ -109,6 +152,7 @@ export const LanguageProvider = ({ children }) => {
       // Tabs
       propertyUnits: 'PROPERTY UNITS',
       registerPayment: 'REGISTER PAYMENT',
+      tenants: 'TENANTS',
       
       // Property List
       propertyUnitsTitle: 'Property Units',
@@ -154,6 +198,48 @@ export const LanguageProvider = ({ children }) => {
       totalUnits: 'Total: {count} property unit{plural}',
       loading: 'Loading...',
       errorOccurred: 'An error occurred',
+      
+      // Tenant Management
+      tenantsTitle: 'Tenants',
+      addTenant: 'ADD TENANT',
+      editTenant: 'EDIT TENANT',
+      deleteTenant: 'DELETE TENANT',
+      fullName: 'Full Name',
+      nationalId: 'National ID',
+      email: 'Email',
+      phone: 'Phone',
+      actions: 'Actions',
+      edit: 'Edit',
+      delete: 'Delete',
+      save: 'SAVE',
+      addNewTenant: 'Add New Tenant',
+      editTenantTitle: 'Edit Tenant',
+      fullNameLabel: 'Full Name',
+      fullNamePlaceholder: 'Ex: John Smith',
+      nationalIdLabel: 'National ID',
+      nationalIdPlaceholder: 'Ex: 12345678',
+      emailLabel: 'Email',
+      emailPlaceholder: 'Ex: john.smith@email.com',
+      phoneLabel: 'Phone',
+      phonePlaceholder: 'Ex: +1 555-123-4567',
+      confirmDelete: 'Are you sure you want to delete this tenant?',
+      confirmDeleteMessage: 'This action cannot be undone.',
+      tenantCreatedSuccess: 'Tenant created successfully!',
+      tenantUpdatedSuccess: 'Tenant updated successfully!',
+      tenantDeletedSuccess: 'Tenant deleted successfully!',
+      failedToCreateTenant: 'Failed to create tenant',
+      failedToUpdateTenant: 'Failed to update tenant',
+      failedToDeleteTenant: 'Failed to delete tenant',
+      duplicateNationalId: 'A tenant with this National ID already exists',
+      duplicateEmail: 'A tenant with this email already exists',
+      totalTenants: 'Total: {count} tenant{plural}',
+      
+      // Property Management
+      deleteProperty: 'DELETE PROPERTY',
+      confirmDeleteProperty: 'Are you sure you want to delete this property?',
+      confirmDeletePropertyMessage: 'This action cannot be undone.',
+      propertyDeletedSuccess: 'Property deleted successfully!',
+      failedToDeleteProperty: 'Failed to delete property',
       
       // Payment Form
       registerPaymentTitle: 'Register Payment',

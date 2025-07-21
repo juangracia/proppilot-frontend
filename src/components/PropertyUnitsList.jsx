@@ -13,11 +13,14 @@ import {
   DialogContent,
   DialogActions,
   MenuItem,
-  Grid
+  Grid,
+  IconButton,
+  Tooltip
 } from '@mui/material'
 import { DataGrid } from '@mui/x-data-grid'
 import SearchIcon from '@mui/icons-material/Search'
 import AddIcon from '@mui/icons-material/Add'
+import DeleteIcon from '@mui/icons-material/Delete'
 import { DatePicker } from '@mui/x-date-pickers/DatePicker'
 import axios from 'axios'
 import { useLanguage } from '../contexts/LanguageContext'
@@ -38,6 +41,9 @@ function PropertyUnitsList() {
     leaseStartDate: null
   })
   const [addLoading, setAddLoading] = useState(false)
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
+  const [propertyToDelete, setPropertyToDelete] = useState(null)
+  const [deleteLoading, setDeleteLoading] = useState(false)
 
   const columns = [
     { 
@@ -83,6 +89,26 @@ function PropertyUnitsList() {
         const tenant = row.tenant
         return tenant ? `${tenant.firstName} ${tenant.lastName}` : t('noTenant')
       }
+    },
+    {
+      field: 'actions',
+      headerName: t('actions'),
+      flex: 0.5,
+      minWidth: 80,
+      maxWidth: 100,
+      sortable: false,
+      filterable: false,
+      renderCell: (params) => (
+        <Tooltip title={t('deleteProperty')}>
+          <IconButton
+            color="error"
+            onClick={() => handleDeleteClick(params.row)}
+            size="small"
+          >
+            <DeleteIcon />
+          </IconButton>
+        </Tooltip>
+      )
     }
   ]
 
@@ -186,6 +212,41 @@ function PropertyUnitsList() {
       setError('Error al agregar la propiedad. Por favor, verifique los datos e intente nuevamente.')
     } finally {
       setAddLoading(false)
+    }
+  }
+
+  const handleDeleteClick = (property) => {
+    setPropertyToDelete(property)
+    setDeleteDialogOpen(true)
+  }
+
+  const handleCloseDeleteDialog = () => {
+    setDeleteDialogOpen(false)
+    setPropertyToDelete(null)
+  }
+
+  const handleConfirmDelete = async () => {
+    if (!propertyToDelete) return
+
+    try {
+      setDeleteLoading(true)
+      setError(null)
+      
+      await axios.delete(`${API_BASE_URL}/property-units/${propertyToDelete.id}`)
+      
+      // Refresh the property list
+      await fetchPropertyUnits()
+      
+      // Close dialog
+      handleCloseDeleteDialog()
+      
+      console.log('Property deleted successfully')
+      
+    } catch (err) {
+      console.error('Error deleting property:', err)
+      setError(t('failedToDeleteProperty'))
+    } finally {
+      setDeleteLoading(false)
     }
   }
 
@@ -341,6 +402,37 @@ function PropertyUnitsList() {
             disabled={addLoading || !newProperty.address || !newProperty.type || !newProperty.baseRentAmount || !newProperty.leaseStartDate}
           >
             {addLoading ? <CircularProgress size={20} /> : t('addPropertyAction')}
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={deleteDialogOpen} onClose={handleCloseDeleteDialog}>
+        <DialogTitle>{t('confirmDeleteProperty')}</DialogTitle>
+        <DialogContent>
+          <Typography>
+            {t('confirmDeletePropertyMessage')}
+          </Typography>
+          {propertyToDelete && (
+            <Box sx={{ mt: 2, p: 2, bgcolor: 'grey.100', borderRadius: 1 }}>
+              <Typography variant="body2" color="text.secondary">
+                <strong>{t('address')}:</strong> {propertyToDelete.address}
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                <strong>{t('type')}:</strong> {propertyToDelete.type}
+              </Typography>
+            </Box>
+          )}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseDeleteDialog}>{t('cancel')}</Button>
+          <Button 
+            onClick={handleConfirmDelete} 
+            color="error"
+            variant="contained"
+            disabled={deleteLoading}
+          >
+            {deleteLoading ? <CircularProgress size={20} /> : t('delete')}
           </Button>
         </DialogActions>
       </Dialog>
