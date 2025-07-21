@@ -22,7 +22,7 @@ import { DatePicker } from '@mui/x-date-pickers/DatePicker'
 import axios from 'axios'
 import { useLanguage } from '../contexts/LanguageContext'
 
-const API_BASE_URL = 'http://localhost:8080/api'
+const API_BASE_URL = '/api'
 
 function PropertyUnitsList() {
   const { t, formatCurrency, currency } = useLanguage()
@@ -235,7 +235,7 @@ function PropertyUnitsList() {
         </Alert>
       )}
 
-      <Box sx={{ height: 600, width: '100%' }}>
+      <Box sx={{ height: 600, width: '100%', minWidth: 0 }}>
         <DataGrid
           rows={propertyUnits}
           columns={columns}

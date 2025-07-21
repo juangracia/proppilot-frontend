@@ -1,6 +1,5 @@
 import React, { useState, useMemo } from 'react'
 import {
-  Container,
   Typography,
   Tabs,
   Tab,
@@ -13,7 +12,7 @@ import {
   AppBar,
   Toolbar
 } from '@mui/material'
-import { Brightness4, Brightness7 } from '@mui/icons-material'
+import { Brightness4, Brightness7, Home } from '@mui/icons-material'
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider'
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns'
 import PropertyUnitsList from './components/PropertyUnitsList'
@@ -74,10 +73,13 @@ function AppContent() {
       <CssBaseline />
       <LocalizationProvider dateAdapter={AdapterDateFns}>
         <AppBar position="static" elevation={0} sx={{ mb: 3 }}>
-          <Toolbar>
-            <Typography variant="h5" component="div" sx={{ flexGrow: 1, fontWeight: 'bold' }}>
-              {t('appTitle')}
-            </Typography>
+          <Toolbar sx={{ px: 3, maxWidth: '100vw' }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', flexGrow: 1 }}>
+              <Home sx={{ mr: 1, fontSize: '1.5rem' }} />
+              <Typography variant="h5" component="div" sx={{ fontWeight: 'bold' }}>
+                {t('appTitle')}
+              </Typography>
+            </Box>
             <Typography variant="subtitle1" sx={{ mr: 2 }}>
               {t('appSubtitle')}
             </Typography>
@@ -87,7 +89,7 @@ function AppContent() {
             </IconButton>
           </Toolbar>
         </AppBar>
-        <Container maxWidth="lg" sx={{ py: 2 }}>
+        <Box sx={{ py: 2, px: 3, maxWidth: '100vw', width: '100vw', boxSizing: 'border-box' }}>
           <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
             <Tabs value={tabValue} onChange={handleTabChange} aria-label="PropPilot tabs">
               <Tab label={t('propertyUnits')} />
@@ -100,7 +102,7 @@ function AppContent() {
           <TabPanel value={tabValue} index={1}>
             <PaymentForm />
           </TabPanel>
-        </Container>
+        </Box>
       </LocalizationProvider>
     </ThemeProvider>
   )
