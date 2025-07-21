@@ -40,18 +40,34 @@ function PropertyUnitsList() {
   const [addLoading, setAddLoading] = useState(false)
 
   const columns = [
-    { field: 'address', headerName: t('address'), width: 300, flex: 1 },
-    { field: 'type', headerName: t('type'), width: 150 },
+    { 
+      field: 'address', 
+      headerName: t('address'), 
+      flex: 2,
+      minWidth: 200,
+      maxWidth: 400
+    },
+    { 
+      field: 'type', 
+      headerName: t('type'), 
+      flex: 0.8,
+      minWidth: 100,
+      maxWidth: 150
+    },
     { 
       field: 'baseRentAmount', 
       headerName: t('baseRent'), 
-      width: 150,
+      flex: 1,
+      minWidth: 120,
+      maxWidth: 180,
       valueFormatter: (value) => formatCurrency(value || 0)
     },
     { 
       field: 'leaseStartDate', 
       headerName: t('leaseStart'), 
-      width: 150,
+      flex: 1,
+      minWidth: 120,
+      maxWidth: 160,
       valueFormatter: (value) => {
         if (!value) return 'N/A'
         return new Date(value).toLocaleDateString()
@@ -60,7 +76,9 @@ function PropertyUnitsList() {
     { 
       field: 'tenant', 
       headerName: t('tenant'), 
-      width: 200,
+      flex: 1.5,
+      minWidth: 150,
+      maxWidth: 250,
       valueGetter: (value, row) => {
         const tenant = row.tenant
         return tenant ? `${tenant.firstName} ${tenant.lastName}` : t('noTenant')
@@ -228,9 +246,17 @@ function PropertyUnitsList() {
           }}
           pageSizeOptions={[5, 10, 20]}
           disableRowSelectionOnClick
+          autoHeight={false}
           sx={{
             '& .MuiDataGrid-cell:hover': {
               color: 'primary.main',
+            },
+            '& .MuiDataGrid-columnHeaders': {
+              backgroundColor: 'rgba(0, 0, 0, 0.04)',
+              fontWeight: 600,
+            },
+            '& .MuiDataGrid-root': {
+              border: 'none',
             },
           }}
         />
