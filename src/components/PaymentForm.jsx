@@ -18,10 +18,13 @@ import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider'
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns'
 import { format } from 'date-fns'
 import axios from 'axios'
+import { useLanguage } from '../contexts/LanguageContext'
 
 const API_BASE_URL = '/api'
 
 function PaymentForm() {
+  const { t } = useLanguage()
+  
   const [formData, setFormData] = useState({
     propertyUnitId: '',
     amount: '',
@@ -37,11 +40,11 @@ function PaymentForm() {
   const [success, setSuccess] = useState(null)
 
   const paymentTypes = [
-    { value: 'RENT', label: 'Rent Payment' },
-    { value: 'DEPOSIT', label: 'Security Deposit' },
-    { value: 'MAINTENANCE', label: 'Maintenance Fee' },
-    { value: 'UTILITY', label: 'Utility Payment' },
-    { value: 'OTHER', label: 'Other' }
+    { value: 'RENT', label: t('rentPayment') },
+    { value: 'DEPOSIT', label: t('depositPayment') },
+    { value: 'MAINTENANCE', label: t('maintenancePayment') },
+    { value: 'UTILITY', label: t('utilityPayment') },
+    { value: 'OTHER', label: t('otherPayment') }
   ]
 
   useEffect(() => {
@@ -101,7 +104,7 @@ function PaymentForm() {
     e.preventDefault()
     
     if (!validateForm()) {
-      setError('Please fix the validation errors below')
+      setError(t('fixValidationErrors'))
       return
     }
     
@@ -122,7 +125,7 @@ function PaymentForm() {
       const response = await axios.post(`${API_BASE_URL}/payments`, paymentData)
       
       if (response.status === 201) {
-        setSuccess('Payment registered successfully!')
+        setSuccess(t('paymentRegisteredSuccess'))
         setFormData({
           propertyUnitId: '',
           amount: '',
@@ -138,9 +141,9 @@ function PaymentForm() {
       // Handle validation errors from backend
       if (err.response?.status === 400 && err.response?.data?.validationErrors) {
         setValidationErrors(err.response.data.validationErrors)
-        setError('Please fix the validation errors below')
+        setError(t('fixValidationErrors'))
       } else {
-        setError(err.response?.data?.message || 'Failed to register payment')
+        setError(err.response?.data?.message || t('failedToRegisterPayment'))
       }
     } finally {
       setLoading(false)
@@ -168,10 +171,11 @@ function PaymentForm() {
 
   return (
     <LocalizationProvider dateAdapter={AdapterDateFns}>
-      <Paper sx={{ p: 3 }}>
-        <Typography variant="h5" component="h2" gutterBottom>
-          Register Payment
-        </Typography>
+      <Box sx={{ width: '100%', maxWidth: '100%', boxSizing: 'border-box' }}>
+        <Paper sx={{ p: 3, mx: 0 }}>
+          <Typography variant="h5" component="h2" gutterBottom>
+            {t('registerPaymentTitle')}
+          </Typography>
         
         {error && (
           <Alert severity="error" sx={{ mb: 2 }}>
@@ -193,14 +197,12 @@ function PaymentForm() {
           <Box component="form" onSubmit={handleSubmit}>
             <Grid container spacing={3}>
               <Grid item xs={12} md={6}>
-                <FormControl fullWidth required>
-                  <InputLabel>Property Unit</InputLabel>
+                <FormControl fullWidth required error={!!validationErrors.propertyUnitId}>
+                  <InputLabel>{t('propertyUnitLabel')}</InputLabel>
                   <Select
                     value={formData.propertyUnitId}
                     onChange={(e) => setFormData({ ...formData, propertyUnitId: e.target.value })}
-                    label="Property Unit"
-                    error={!!validationErrors.propertyUnitId}
-                    helperText={validationErrors.propertyUnitId}
+                    label={t('propertyUnitLabel')}
                   >
                     {propertyUnits.map((unit) => (
                       <MenuItem key={unit.id} value={unit.id}>
@@ -208,12 +210,17 @@ function PaymentForm() {
                       </MenuItem>
                     ))}
                   </Select>
+                  {validationErrors.propertyUnitId && (
+                    <Typography variant="caption" color="error" sx={{ mt: 0.5, ml: 1.75 }}>
+                      {validationErrors.propertyUnitId}
+                    </Typography>
+                  )}
                 </FormControl>
               </Grid>
 
               <Grid item xs={12} md={6}>
                 <TextField
-                  label="Payment Amount"
+                  label={t('paymentAmountLabel')}
                   type="number"
                   value={formData.amount}
                   onChange={(e) => setFormData({ ...formData, amount: e.target.value })}
@@ -230,26 +237,25 @@ function PaymentForm() {
 
               <Grid item xs={12} md={6}>
                 <DatePicker
-                  label="Payment Date"
+                  label={t('paymentDateLabel')}
                   value={formData.paymentDate}
                   onChange={(date) => setFormData({ ...formData, paymentDate: date })}
                   maxDate={new Date()}
-                  renderInput={(params) => (
-                    <TextField 
-                      {...params} 
-                      fullWidth 
-                      required 
-                      error={!!validationErrors.paymentDate}
-                      helperText={validationErrors.paymentDate}
-                    />
-                  )}
+                  slotProps={{
+                    textField: {
+                      fullWidth: true,
+                      required: true,
+                      error: !!validationErrors.paymentDate,
+                      helperText: validationErrors.paymentDate
+                    }
+                  }}
                 />
               </Grid>
 
               <Grid item xs={12} md={6}>
                 <TextField
                   select
-                  label="Payment Type"
+                  label={t('paymentTypeLabel')}
                   value={formData.paymentType}
                   onChange={(e) => setFormData({ ...formData, paymentType: e.target.value })}
                   fullWidth
@@ -265,44 +271,59 @@ function PaymentForm() {
 
               <Grid item xs={12}>
                 <TextField
-                  label="Description (Optional)"
+                  label={t('descriptionLabel')}
                   value={formData.description}
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                   fullWidth
                   multiline
                   rows={3}
                   error={!!validationErrors.description}
-                  helperText={validationErrors.description || `${formData.description.length}/500 characters`}
+                  helperText={validationErrors.description || t('charactersCount', { count: formData.description.length })}
                   inputProps={{ maxLength: 500 }}
                 />
               </Grid>
 
               {selectedPropertyUnit && (
                 <Grid item xs={12}>
-                  <Paper sx={{ p: 2, bgcolor: 'grey.50' }}>
-                    <Typography variant="subtitle2" gutterBottom>
-                      Selected Property Details:
+                  <Box sx={{ 
+                    p: 2, 
+                    border: 1, 
+                    borderColor: 'divider', 
+                    borderRadius: 1,
+                    bgcolor: 'background.default'
+                  }}>
+                    <Typography variant="subtitle2" gutterBottom color="primary">
+                      {t('selectedPropertyDetails')}
                     </Typography>
-                    <Typography variant="body2">
-                      <strong>Address:</strong> {selectedPropertyUnit.address}
-                    </Typography>
-                    <Typography variant="body2">
-                      <strong>Type:</strong> {selectedPropertyUnit.type}
-                    </Typography>
-                    <Typography variant="body2">
-                      <strong>Base Rent:</strong> ${selectedPropertyUnit.baseRentAmount?.toFixed(2)}
-                    </Typography>
-                    {selectedPropertyUnit.tenant && (
+                    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
                       <Typography variant="body2">
-                        <strong>Tenant:</strong> {selectedPropertyUnit.tenant.firstName} {selectedPropertyUnit.tenant.lastName}
+                        <strong>Address:</strong> {selectedPropertyUnit.address}
                       </Typography>
-                    )}
-                  </Paper>
+                      <Typography variant="body2">
+                        <strong>Type:</strong> {selectedPropertyUnit.type}
+                      </Typography>
+                      <Typography variant="body2">
+                        <strong>Base Rent:</strong> ${selectedPropertyUnit.baseRentAmount?.toFixed(2)}
+                      </Typography>
+                      {selectedPropertyUnit.tenant && (
+                        <Typography variant="body2">
+                          <strong>Tenant:</strong> {selectedPropertyUnit.tenant.firstName} {selectedPropertyUnit.tenant.lastName}
+                        </Typography>
+                      )}
+                    </Box>
+                  </Box>
                 </Grid>
               )}
 
               <Grid item xs={12}>
-                <Box sx={{ display: 'flex', gap: 2, justifyContent: 'flex-end' }}>
+                <Box sx={{ 
+                  display: 'flex', 
+                  gap: 2, 
+                  justifyContent: 'flex-end',
+                  pt: 2,
+                  borderTop: 1,
+                  borderColor: 'divider'
+                }}>
                   <Button
                     type="button"
                     variant="outlined"
@@ -314,26 +335,29 @@ function PaymentForm() {
                         paymentType: 'RENT',
                         description: ''
                       })
-                      setError(null)
-                      setSuccess(null)
+                      setError('')
+                      setSuccess('')
+                      setValidationErrors({})
                     }}
+                    sx={{ minWidth: 100 }}
                   >
-                    Clear Form
+                    {t('clearForm')}
                   </Button>
                   <Button
                     type="submit"
                     variant="contained"
                     disabled={loading}
-                    sx={{ minWidth: 120 }}
+                    sx={{ minWidth: 140 }}
                   >
-                    {loading ? <CircularProgress size={24} /> : 'Register Payment'}
+                    {loading ? <CircularProgress size={24} color="inherit" /> : t('registerPaymentAction')}
                   </Button>
                 </Box>
               </Grid>
             </Grid>
           </Box>
         )}
-      </Paper>
+        </Paper>
+      </Box>
     </LocalizationProvider>
   )
 }

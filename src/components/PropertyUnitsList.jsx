@@ -245,9 +245,11 @@ function PropertyUnitsList() {
             },
           }}
           pageSizeOptions={[5, 10, 20]}
+          paginationMode="client"
           disableRowSelectionOnClick
           autoHeight={false}
           sx={{
+            height: 650, // Fixed height to show exactly 10 rows + header + pagination
             '& .MuiDataGrid-cell:hover': {
               color: 'primary.main',
             },

@@ -50,7 +50,7 @@ export const LanguageProvider = ({ children }) => {
       // Add Property Dialog
       addNewProperty: 'Agregar Nueva Propiedad',
       addressLabel: 'Dirección',
-      addressPlaceholder: 'Ej: Av. Colón 1234, Nueva Córdoba',
+      addressPlaceholder: 'Ej: Calle Principal 1234, Barrio Centro',
       addressHelper: 'Dirección completa de la propiedad',
       propertyTypeLabel: 'Tipo de Propiedad',
       selectPropertyType: 'Seleccionar tipo de propiedad',
@@ -68,6 +68,28 @@ export const LanguageProvider = ({ children }) => {
       totalUnits: 'Total: {count} unidade{plural} de propiedad',
       loading: 'Cargando...',
       errorOccurred: 'Ocurrió un error',
+      
+      // Payment Form
+      registerPaymentTitle: 'Registrar Pago',
+      propertyUnitLabel: 'Unidad de Propiedad',
+      paymentAmountLabel: 'Monto del Pago',
+      paymentDateLabel: 'Fecha de Pago',
+      paymentTypeLabel: 'Tipo de Pago',
+      descriptionLabel: 'Descripción (Opcional)',
+      clearForm: 'Limpiar Formulario',
+      registerPaymentAction: 'Registrar Pago',
+      selectedPropertyDetails: 'Detalles de la Propiedad Seleccionada:',
+      paymentRegisteredSuccess: '¡Pago registrado exitosamente!',
+      failedToRegisterPayment: 'Error al registrar el pago',
+      fixValidationErrors: 'Por favor corrige los errores de validación',
+      charactersCount: '{count}/500 caracteres',
+      
+      // Payment Types
+      rentPayment: 'Pago de Alquiler',
+      depositPayment: 'Depósito',
+      maintenancePayment: 'Mantenimiento',
+      utilityPayment: 'Servicios',
+      otherPayment: 'Otro',
       
       // Currencies
       currencySymbol: {
@@ -132,6 +154,28 @@ export const LanguageProvider = ({ children }) => {
       totalUnits: 'Total: {count} property unit{plural}',
       loading: 'Loading...',
       errorOccurred: 'An error occurred',
+      
+      // Payment Form
+      registerPaymentTitle: 'Register Payment',
+      propertyUnitLabel: 'Property Unit',
+      paymentAmountLabel: 'Payment Amount',
+      paymentDateLabel: 'Payment Date',
+      paymentTypeLabel: 'Payment Type',
+      descriptionLabel: 'Description (Optional)',
+      clearForm: 'Clear Form',
+      registerPaymentAction: 'Register Payment',
+      selectedPropertyDetails: 'Selected Property Details:',
+      paymentRegisteredSuccess: 'Payment registered successfully!',
+      failedToRegisterPayment: 'Failed to register payment',
+      fixValidationErrors: 'Please fix the validation errors below',
+      charactersCount: '{count}/500 characters',
+      
+      // Payment Types
+      rentPayment: 'Rent Payment',
+      depositPayment: 'Deposit',
+      maintenancePayment: 'Maintenance',
+      utilityPayment: 'Utility',
+      otherPayment: 'Other',
       
       // Currencies
       currencySymbol: {
