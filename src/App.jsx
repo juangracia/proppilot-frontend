@@ -42,7 +42,7 @@ function TabPanel({ children, value, index, ...other }) {
 
 function AppContent() {
   const [tabValue, setTabValue] = useState(0)
-  const [darkMode, setDarkMode] = useState(false)
+  const [darkMode, setDarkMode] = useState(true)
   const { t } = useLanguage()
 
   const handleTabChange = (event, newValue) => {
