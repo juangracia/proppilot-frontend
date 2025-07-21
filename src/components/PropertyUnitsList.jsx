@@ -40,7 +40,6 @@ function PropertyUnitsList() {
   const [addLoading, setAddLoading] = useState(false)
 
   const columns = [
-    { field: 'id', headerName: t('id'), width: 90 },
     { field: 'address', headerName: t('address'), width: 300, flex: 1 },
     { field: 'type', headerName: t('type'), width: 150 },
     { 
