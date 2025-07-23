@@ -15,22 +15,75 @@ import {
   MenuItem,
   Grid,
   IconButton,
-  Tooltip
+  Tooltip,
+  Card,
+  CardContent,
+  Chip,
+  Avatar,
+  Divider
 } from '@mui/material'
-import { DataGrid } from '@mui/x-data-grid'
-import SearchIcon from '@mui/icons-material/Search'
-import AddIcon from '@mui/icons-material/Add'
-import DeleteIcon from '@mui/icons-material/Delete'
+import {
+  Search as SearchIcon,
+  Add as AddIcon,
+  Delete as DeleteIcon,
+  Home,
+  Business,
+  Person,
+  AttachMoney,
+  CalendarToday,
+  Edit,
+  Visibility
+} from '@mui/icons-material'
 import { DatePicker } from '@mui/x-date-pickers/DatePicker'
 import axios from 'axios'
 import { useLanguage } from '../contexts/LanguageContext'
 
 const API_BASE_URL = '/api'
 
+// Mock data for demonstration
+const mockProperties = [
+  {
+    id: 1,
+    address: '123 Oak Street, Apt 2B',
+    type: 'Apartment',
+    status: 'Occupied',
+    tenant: 'Sarah Johnson',
+    monthlyRent: 1200,
+    leaseStart: '12/31/2023'
+  },
+  {
+    id: 2,
+    address: '456 Pine Avenue House',
+    type: 'House',
+    status: 'Occupied',
+    tenant: 'Mike Chen',
+    monthlyRent: 2100,
+    leaseStart: '11/14/2023'
+  },
+  {
+    id: 3,
+    address: '789 Maple Court, Unit 5A',
+    type: 'Apartment',
+    status: 'Occupied',
+    tenant: 'Emma Davis',
+    monthlyRent: 950,
+    leaseStart: '1/31/2024'
+  },
+  {
+    id: 4,
+    address: '321 Elm Street Loft',
+    type: 'Commercial',
+    status: 'Vacant',
+    tenant: 'Vacant',
+    monthlyRent: 1800,
+    leaseStart: null
+  }
+]
+
 function PropertyUnitsList() {
   const { t, formatCurrency, currency } = useLanguage()
-  const [propertyUnits, setPropertyUnits] = useState([])
-  const [loading, setLoading] = useState(true)
+  const [propertyUnits, setPropertyUnits] = useState(mockProperties)
+  const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
   const [searchTerm, setSearchTerm] = useState('')
   const [openAddDialog, setOpenAddDialog] = useState(false)
@@ -41,213 +94,61 @@ function PropertyUnitsList() {
     leaseStartDate: null
   })
   const [addLoading, setAddLoading] = useState(false)
-  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
-  const [propertyToDelete, setPropertyToDelete] = useState(null)
-  const [deleteLoading, setDeleteLoading] = useState(false)
 
-  const columns = [
-    { 
-      field: 'address', 
-      headerName: t('address'), 
-      flex: 2,
-      minWidth: 200,
-      maxWidth: 400
-    },
-    { 
-      field: 'type', 
-      headerName: t('type'), 
-      flex: 0.8,
-      minWidth: 100,
-      maxWidth: 150
-    },
-    { 
-      field: 'baseRentAmount', 
-      headerName: t('baseRent'), 
-      flex: 1,
-      minWidth: 120,
-      maxWidth: 180,
-      valueFormatter: (value) => formatCurrency(value || 0)
-    },
-    { 
-      field: 'leaseStartDate', 
-      headerName: t('leaseStart'), 
-      flex: 1,
-      minWidth: 120,
-      maxWidth: 160,
-      valueFormatter: (value) => {
-        if (!value) return 'N/A'
-        return new Date(value).toLocaleDateString()
-      }
-    },
-    { 
-      field: 'tenant', 
-      headerName: t('tenant'), 
-      flex: 1.5,
-      minWidth: 150,
-      maxWidth: 250,
-      valueGetter: (value, row) => {
-        const tenant = row.tenant
-        return tenant ? `${tenant.firstName} ${tenant.lastName}` : t('noTenant')
-      }
-    },
-    {
-      field: 'actions',
-      headerName: t('actions'),
-      flex: 0.5,
-      minWidth: 80,
-      maxWidth: 100,
-      sortable: false,
-      filterable: false,
-      renderCell: (params) => (
-        <Tooltip title={t('deleteProperty')}>
-          <IconButton
-            color="error"
-            onClick={() => handleDeleteClick(params.row)}
-            size="small"
-          >
-            <DeleteIcon />
-          </IconButton>
-        </Tooltip>
-      )
-    }
-  ]
+  const filteredProperties = propertyUnits.filter(property =>
+    property.address.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    property.tenant.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    property.type.toLowerCase().includes(searchTerm.toLowerCase())
+  )
 
-  const fetchPropertyUnits = async () => {
-    try {
-      setLoading(true)
-      setError(null)
-      const response = await axios.get(`${API_BASE_URL}/property-units`)
-      setPropertyUnits(response.data)
-    } catch (err) {
-      console.error('Error fetching property units:', err)
-      setError('Failed to load property units. Please make sure the backend server is running.')
-    } finally {
-      setLoading(false)
+  const getStatusColor = (status) => {
+    switch (status) {
+      case 'Occupied':
+        return 'success'
+      case 'Vacant':
+        return 'warning'
+      default:
+        return 'default'
     }
   }
 
-  const searchPropertyUnits = useCallback(async (address) => {
-    if (!address.trim()) {
-      fetchPropertyUnits()
-      return
+  const getTypeIcon = (type) => {
+    switch (type) {
+      case 'House':
+        return <Home />
+      case 'Apartment':
+        return <Home />
+      case 'Commercial':
+        return <Business />
+      default:
+        return <Home />
     }
-
-    try {
-      setLoading(true)
-      setError(null)
-      const response = await axios.get(`${API_BASE_URL}/property-units/search`, {
-        params: { address }
-      })
-      setPropertyUnits(response.data)
-    } catch (err) {
-      console.error('Error searching property units:', err)
-      setError('Failed to search property units.')
-    } finally {
-      setLoading(false)
-    }
-  }, [])
-
-  useEffect(() => {
-    fetchPropertyUnits()
-  }, [])
-
-  useEffect(() => {
-    const timeoutId = setTimeout(() => {
-      searchPropertyUnits(searchTerm)
-    }, 500) // Debounce search
-
-    return () => clearTimeout(timeoutId)
-  }, [searchTerm, searchPropertyUnits])
-
-  const handleSearchChange = (event) => {
-    setSearchTerm(event.target.value)
   }
 
   const handleAddProperty = () => {
-    setOpenAddDialog(true)
-  }
-
-  const handleCloseAddDialog = () => {
-    setOpenAddDialog(false)
-    setNewProperty({
-      address: '',
-      type: '',
-      baseRentAmount: '',
-      leaseStartDate: null
-    })
-  }
-
-  const handleNewPropertyChange = (field, value) => {
-    setNewProperty(prev => ({
-      ...prev,
-      [field]: value
-    }))
-  }
-
-  const handleSubmitNewProperty = async () => {
-    try {
-      setAddLoading(true)
-      setError(null)
-      
-      const propertyData = {
+    setAddLoading(true)
+    // Simulate API call
+    setTimeout(() => {
+      const newId = Math.max(...propertyUnits.map(p => p.id)) + 1
+      const property = {
+        id: newId,
         address: newProperty.address,
         type: newProperty.type,
-        baseRentAmount: parseFloat(newProperty.baseRentAmount),
-        leaseStartDate: newProperty.leaseStartDate ? newProperty.leaseStartDate.toISOString().split('T')[0] : null
+        status: 'Vacant',
+        tenant: 'Vacant',
+        monthlyRent: parseFloat(newProperty.baseRentAmount),
+        leaseStart: newProperty.leaseStartDate ? newProperty.leaseStartDate.toLocaleDateString() : null
       }
-      
-      const response = await axios.post(`${API_BASE_URL}/property-units`, propertyData)
-      
-      // Refresh the property list
-      await fetchPropertyUnits()
-      
-      // Close dialog and reset form
-      handleCloseAddDialog()
-      
-      // Show success message (you could add a success state if needed)
-      console.log('Property added successfully:', response.data)
-      
-    } catch (err) {
-      console.error('Error adding property:', err)
-      setError('Error al agregar la propiedad. Por favor, verifique los datos e intente nuevamente.')
-    } finally {
+      setPropertyUnits([...propertyUnits, property])
+      setOpenAddDialog(false)
+      setNewProperty({
+        address: '',
+        type: '',
+        baseRentAmount: '',
+        leaseStartDate: null
+      })
       setAddLoading(false)
-    }
-  }
-
-  const handleDeleteClick = (property) => {
-    setPropertyToDelete(property)
-    setDeleteDialogOpen(true)
-  }
-
-  const handleCloseDeleteDialog = () => {
-    setDeleteDialogOpen(false)
-    setPropertyToDelete(null)
-  }
-
-  const handleConfirmDelete = async () => {
-    if (!propertyToDelete) return
-
-    try {
-      setDeleteLoading(true)
-      setError(null)
-      
-      await axios.delete(`${API_BASE_URL}/property-units/${propertyToDelete.id}`)
-      
-      // Refresh the property list
-      await fetchPropertyUnits()
-      
-      // Close dialog
-      handleCloseDeleteDialog()
-      
-      console.log('Property deleted successfully')
-      
-    } catch (err) {
-      console.error('Error deleting property:', err)
-      setError(t('failedToDeleteProperty'))
-    } finally {
-      setDeleteLoading(false)
-    }
+    }, 1000)
   }
 
   if (loading) {
@@ -259,27 +160,23 @@ function PropertyUnitsList() {
   }
 
   return (
-    <Paper sx={{ p: 3 }}>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-        <Typography variant="h5" component="h2">
-          {t('propertyUnitsTitle')}
+    <Box>
+      {/* Header */}
+      <Box sx={{ mb: 4 }}>
+        <Typography variant="h4" sx={{ fontWeight: 600, mb: 1 }}>
+          Properties
         </Typography>
-        <Button
-          variant="contained"
-          startIcon={<AddIcon />}
-          onClick={handleAddProperty}
-          sx={{ ml: 2 }}
-        >
-          {t('addProperty')}
-        </Button>
+        <Typography variant="body1" color="text.secondary">
+          Manage your rental properties and units.
+        </Typography>
       </Box>
-      
-      <Box sx={{ mb: 3 }}>
+
+      {/* Search and Add Button */}
+      <Box sx={{ display: 'flex', gap: 2, mb: 3, alignItems: 'center' }}>
         <TextField
-          fullWidth
-          placeholder={t('searchPlaceholder')}
+          placeholder="Search properties..."
           value={searchTerm}
-          onChange={handleSearchChange}
+          onChange={(e) => setSearchTerm(e.target.value)}
           InputProps={{
             startAdornment: (
               <InputAdornment position="start">
@@ -287,156 +184,178 @@ function PropertyUnitsList() {
               </InputAdornment>
             ),
           }}
+          sx={{ flexGrow: 1, maxWidth: 400 }}
         />
+        <Button
+          variant="contained"
+          startIcon={<AddIcon />}
+          onClick={() => setOpenAddDialog(true)}
+          sx={{ textTransform: 'none' }}
+        >
+          Add Property
+        </Button>
       </Box>
 
       {error && (
-        <Alert severity="error" sx={{ mb: 2 }}>
+        <Alert severity="error" sx={{ mb: 3 }}>
           {error}
         </Alert>
       )}
 
-      <Box sx={{ height: 600, width: '100%', minWidth: 0 }}>
-        <DataGrid
-          rows={propertyUnits}
-          columns={columns}
-          initialState={{
-            pagination: {
-              paginationModel: { page: 0, pageSize: 10 },
-            },
-          }}
-          pageSizeOptions={[5, 10, 20]}
-          paginationMode="client"
-          disableRowSelectionOnClick
-          autoHeight={false}
-          sx={{
-            height: 650, // Fixed height to show exactly 10 rows + header + pagination
-            '& .MuiDataGrid-cell:hover': {
-              color: 'primary.main',
-            },
-            '& .MuiDataGrid-columnHeaders': {
-              backgroundColor: 'rgba(0, 0, 0, 0.04)',
-              fontWeight: 600,
-            },
-            '& .MuiDataGrid-root': {
-              border: 'none',
-            },
-          }}
-        />
-      </Box>
-      
-      <Typography variant="body2" color="text.secondary" sx={{ mt: 2 }}>
-        {t('totalUnits', { count: propertyUnits.length, plural: propertyUnits.length !== 1 ? 's' : '' })}
-      </Typography>
+      {/* Properties Grid */}
+      <Grid container spacing={3}>
+        {filteredProperties.map((property) => (
+          <Grid item xs={12} sm={6} md={4} key={property.id}>
+            <Card 
+              sx={{ 
+                height: '100%',
+                transition: 'transform 0.2s, box-shadow 0.2s',
+                '&:hover': {
+                  transform: 'translateY(-4px)',
+                  boxShadow: 4
+                }
+              }}
+            >
+              <CardContent>
+                {/* Property Type and Status */}
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <Avatar sx={{ bgcolor: 'primary.main', width: 32, height: 32 }}>
+                      {getTypeIcon(property.type)}
+                    </Avatar>
+                    <Typography variant="body2" color="text.secondary">
+                      {property.type}
+                    </Typography>
+                  </Box>
+                  <Chip 
+                    label={property.status} 
+                    color={getStatusColor(property.status)}
+                    size="small"
+                  />
+                </Box>
+
+                {/* Address */}
+                <Typography variant="h6" sx={{ fontWeight: 600, mb: 2, lineHeight: 1.3 }}>
+                  {property.address}
+                </Typography>
+
+                {/* Tenant Info */}
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
+                  <Person sx={{ fontSize: 16, color: 'text.secondary' }} />
+                  <Typography variant="body2" color="text.secondary">
+                    Tenant:
+                  </Typography>
+                  <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                    {property.tenant}
+                  </Typography>
+                </Box>
+
+                {/* Monthly Rent */}
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
+                  <AttachMoney sx={{ fontSize: 16, color: 'text.secondary' }} />
+                  <Typography variant="body2" color="text.secondary">
+                    Monthly Rent:
+                  </Typography>
+                  <Typography variant="body2" sx={{ fontWeight: 600, color: 'primary.main' }}>
+                    ${property.monthlyRent.toLocaleString()}
+                  </Typography>
+                </Box>
+
+                {/* Lease Start */}
+                {property.leaseStart && (
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 3 }}>
+                    <CalendarToday sx={{ fontSize: 16, color: 'text.secondary' }} />
+                    <Typography variant="body2" color="text.secondary">
+                      Lease Start:
+                    </Typography>
+                    <Typography variant="body2">
+                      {property.leaseStart}
+                    </Typography>
+                  </Box>
+                )}
+
+                <Divider sx={{ my: 2 }} />
+
+                {/* Action Buttons */}
+                <Box sx={{ display: 'flex', gap: 1 }}>
+                  <Button
+                    variant="outlined"
+                    size="small"
+                    startIcon={<Visibility />}
+                    sx={{ textTransform: 'none', flex: 1 }}
+                  >
+                    View Details
+                  </Button>
+                  <Button
+                    variant="outlined"
+                    size="small"
+                    startIcon={<Edit />}
+                    sx={{ textTransform: 'none', flex: 1 }}
+                  >
+                    Edit
+                  </Button>
+                </Box>
+              </CardContent>
+            </Card>
+          </Grid>
+        ))}
+      </Grid>
 
       {/* Add Property Dialog */}
-      <Dialog open={openAddDialog} onClose={handleCloseAddDialog} maxWidth="md" fullWidth>
-        <DialogTitle>{t('addNewProperty')}</DialogTitle>
+      <Dialog open={openAddDialog} onClose={() => setOpenAddDialog(false)} maxWidth="sm" fullWidth>
+        <DialogTitle>Add New Property</DialogTitle>
         <DialogContent>
-          <Grid container spacing={3} sx={{ mt: 1 }}>
-            <Grid item xs={12}>
-              <TextField
-                fullWidth
-                label={t('addressLabel')}
-                placeholder={t('addressPlaceholder')}
-                value={newProperty.address}
-                onChange={(e) => handleNewPropertyChange('address', e.target.value)}
-                required
-                helperText={t('addressHelper')}
-              />
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <TextField
-                fullWidth
-                select
-                label={t('propertyTypeLabel')}
-                value={newProperty.type}
-                onChange={(e) => handleNewPropertyChange('type', e.target.value)}
-                required
-              >
-                <MenuItem value="Apartment">{t('apartment')}</MenuItem>
-                <MenuItem value="House">{t('house')}</MenuItem>
-                <MenuItem value="Duplex">{t('duplex')}</MenuItem>
-                <MenuItem value="Townhouse">{t('ph')}</MenuItem>
-                <MenuItem value="Studio">{t('studio')}</MenuItem>
-                <MenuItem value="Loft">{t('loft')}</MenuItem>
-              </TextField>
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <TextField
-                fullWidth
-                label={t('baseRentLabel')}
-                type="number"
-                placeholder={t('baseRentPlaceholder')}
-                value={newProperty.baseRentAmount}
-                onChange={(e) => handleNewPropertyChange('baseRentAmount', e.target.value)}
-                required
-                InputProps={{
-                  startAdornment: <InputAdornment position="start">{t(`currencySymbol.${currency}`)}</InputAdornment>,
-                }}
-                helperText={t('baseRentHelper')}
-              />
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <DatePicker
-                label={t('leaseStartLabel')}
-                value={newProperty.leaseStartDate}
-                onChange={(newValue) => handleNewPropertyChange('leaseStartDate', newValue)}
-                maxDate={new Date()}
-                slotProps={{
-                  textField: {
-                    fullWidth: true,
-                    required: true,
-                    helperText: t('leaseStartHelper')
-                  }
-                }}
-              />
-            </Grid>
-          </Grid>
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, pt: 1 }}>
+            <TextField
+              label="Property Address"
+              value={newProperty.address}
+              onChange={(e) => setNewProperty({ ...newProperty, address: e.target.value })}
+              fullWidth
+              required
+            />
+            <TextField
+              select
+              label="Property Type"
+              value={newProperty.type}
+              onChange={(e) => setNewProperty({ ...newProperty, type: e.target.value })}
+              fullWidth
+              required
+            >
+              <MenuItem value="Apartment">Apartment</MenuItem>
+              <MenuItem value="House">House</MenuItem>
+              <MenuItem value="Commercial">Commercial</MenuItem>
+            </TextField>
+            <TextField
+              label="Base Rent Amount"
+              type="number"
+              value={newProperty.baseRentAmount}
+              onChange={(e) => setNewProperty({ ...newProperty, baseRentAmount: e.target.value })}
+              fullWidth
+              required
+              InputProps={{
+                startAdornment: <InputAdornment position="start">$</InputAdornment>,
+              }}
+            />
+            <DatePicker
+              label="Lease Start Date"
+              value={newProperty.leaseStartDate}
+              onChange={(date) => setNewProperty({ ...newProperty, leaseStartDate: date })}
+              renderInput={(params) => <TextField {...params} fullWidth />}
+            />
+          </Box>
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleCloseAddDialog}>{t('cancel')}</Button>
+          <Button onClick={() => setOpenAddDialog(false)}>Cancel</Button>
           <Button 
-            onClick={handleSubmitNewProperty} 
+            onClick={handleAddProperty} 
             variant="contained"
-            disabled={addLoading || !newProperty.address || !newProperty.type || !newProperty.baseRentAmount || !newProperty.leaseStartDate}
+            disabled={addLoading || !newProperty.address || !newProperty.type || !newProperty.baseRentAmount}
           >
-            {addLoading ? <CircularProgress size={20} /> : t('addPropertyAction')}
+            {addLoading ? <CircularProgress size={20} /> : 'Add Property'}
           </Button>
         </DialogActions>
       </Dialog>
-
-      {/* Delete Confirmation Dialog */}
-      <Dialog open={deleteDialogOpen} onClose={handleCloseDeleteDialog}>
-        <DialogTitle>{t('confirmDeleteProperty')}</DialogTitle>
-        <DialogContent>
-          <Typography>
-            {t('confirmDeletePropertyMessage')}
-          </Typography>
-          {propertyToDelete && (
-            <Box sx={{ mt: 2, p: 2, bgcolor: 'grey.100', borderRadius: 1 }}>
-              <Typography variant="body2" color="text.secondary">
-                <strong>{t('address')}:</strong> {propertyToDelete.address}
-              </Typography>
-              <Typography variant="body2" color="text.secondary">
-                <strong>{t('type')}:</strong> {propertyToDelete.type}
-              </Typography>
-            </Box>
-          )}
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleCloseDeleteDialog}>{t('cancel')}</Button>
-          <Button 
-            onClick={handleConfirmDelete} 
-            color="error"
-            variant="contained"
-            disabled={deleteLoading}
-          >
-            {deleteLoading ? <CircularProgress size={20} /> : t('delete')}
-          </Button>
-        </DialogActions>
-      </Dialog>
-    </Paper>
+    </Box>
   )
 }
 

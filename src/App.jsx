@@ -1,8 +1,6 @@
 import React, { useState, useMemo } from 'react'
 import {
   Typography,
-  Tabs,
-  Tab,
   Box,
   Paper,
   ThemeProvider,
@@ -10,11 +8,27 @@ import {
   CssBaseline,
   IconButton,
   AppBar,
-  Toolbar
+  Toolbar,
+  Drawer,
+  List,
+  ListItem,
+  ListItemIcon,
+  ListItemText,
+  Divider,
+  Container
 } from '@mui/material'
-import { Brightness4, Brightness7, Home } from '@mui/icons-material'
+import { 
+  Brightness4, 
+  Brightness7, 
+  Dashboard,
+  Home,
+  Payment,
+  People,
+  Menu
+} from '@mui/icons-material'
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider'
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns'
+import DashboardView from './components/DashboardView'
 import PropertyUnitsList from './components/PropertyUnitsList'
 import PaymentForm from './components/PaymentForm'
 import TenantsList from './components/TenantsList'
@@ -22,91 +36,209 @@ import { LanguageProvider, useLanguage } from './contexts/LanguageContext'
 import LanguageCurrencySelector from './components/LanguageCurrencySelector'
 import './App.css'
 
-function TabPanel({ children, value, index, ...other }) {
-  return (
-    <div
-      role="tabpanel"
-      hidden={value !== index}
-      id={`simple-tabpanel-${index}`}
-      aria-labelledby={`simple-tab-${index}`}
-      {...other}
-    >
-      {value === index && (
-        <Box sx={{ p: 3 }}>
-          {children}
-        </Box>
-      )}
-    </div>
-  )
-}
+const drawerWidth = 240
+
+const menuItems = [
+  { text: 'Dashboard', icon: <Dashboard />, value: 0 },
+  { text: 'Properties', icon: <Home />, value: 1 },
+  { text: 'Tenants', icon: <People />, value: 2 },
+  { text: 'Payments', icon: <Payment />, value: 3 }
+]
 
 function AppContent() {
-  const [tabValue, setTabValue] = useState(0)
-  const [darkMode, setDarkMode] = useState(true)
+  const [selectedView, setSelectedView] = useState(0)
+  const [darkMode, setDarkMode] = useState(false)
+  const [mobileOpen, setMobileOpen] = useState(false)
   const { t } = useLanguage()
 
-  const handleTabChange = (event, newValue) => {
-    setTabValue(newValue)
+  const handleDrawerToggle = () => {
+    setMobileOpen(!mobileOpen)
+  }
+
+  const handleMenuClick = (value) => {
+    setSelectedView(value)
+    setMobileOpen(false)
   }
 
   const toggleDarkMode = () => {
     setDarkMode(!darkMode)
   }
 
-  const themeMode = useMemo(
+  const theme = useMemo(
     () =>
       createTheme({
         palette: {
           mode: darkMode ? 'dark' : 'light',
           primary: {
-            main: '#1976d2',
+            main: '#2196F3',
           },
           secondary: {
-            main: '#dc004e',
+            main: '#FF9800',
+          },
+          background: {
+            default: darkMode ? '#121212' : '#f5f5f5',
+            paper: darkMode ? '#1e1e1e' : '#ffffff',
+          },
+        },
+        typography: {
+          h4: {
+            fontWeight: 600,
+          },
+          h6: {
+            fontWeight: 500,
+          },
+        },
+        components: {
+          MuiDrawer: {
+            styleOverrides: {
+              paper: {
+                backgroundColor: darkMode ? '#1e1e1e' : '#ffffff',
+                borderRight: `1px solid ${darkMode ? '#333' : '#e0e0e0'}`,
+              },
+            },
           },
         },
       }),
     [darkMode]
   )
 
+  const drawer = (
+    <div>
+      <Toolbar>
+        <Box sx={{ display: 'flex', alignItems: 'center', width: '100%' }}>
+          <Home sx={{ mr: 1, color: 'primary.main' }} />
+          <Typography variant="h6" sx={{ fontWeight: 600, color: 'primary.main' }}>
+            PropPilot
+          </Typography>
+        </Box>
+      </Toolbar>
+      <Divider />
+      <List>
+        {menuItems.map((item) => (
+          <ListItem
+            button
+            key={item.text}
+            onClick={() => handleMenuClick(item.value)}
+            selected={selectedView === item.value}
+            sx={{
+              '&.Mui-selected': {
+                backgroundColor: 'primary.main',
+                color: 'white',
+                '& .MuiListItemIcon-root': {
+                  color: 'white',
+                },
+                '&:hover': {
+                  backgroundColor: 'primary.dark',
+                },
+              },
+            }}
+          >
+            <ListItemIcon sx={{ color: selectedView === item.value ? 'white' : 'inherit' }}>
+              {item.icon}
+            </ListItemIcon>
+            <ListItemText primary={item.text} />
+          </ListItem>
+        ))}
+      </List>
+    </div>
+  )
+
+  const renderContent = () => {
+    switch (selectedView) {
+      case 0:
+        return <DashboardView />
+      case 1:
+        return <PropertyUnitsList />
+      case 2:
+        return <TenantsList />
+      case 3:
+        return <PaymentForm />
+      default:
+        return <DashboardView />
+    }
+  }
+
   return (
-    <ThemeProvider theme={themeMode}>
+    <ThemeProvider theme={theme}>
       <CssBaseline />
       <LocalizationProvider dateAdapter={AdapterDateFns}>
-        <AppBar position="static" elevation={0} sx={{ mb: 3 }}>
-          <Toolbar sx={{ px: 3, maxWidth: '100vw' }}>
-            <Box sx={{ display: 'flex', alignItems: 'center', flexGrow: 1 }}>
-              <Home sx={{ mr: 1, fontSize: '1.5rem' }} />
-              <Typography variant="h5" component="div" sx={{ fontWeight: 'bold' }}>
-                {t('appTitle')}
+        <Box sx={{ display: 'flex' }}>
+          <AppBar
+            position="fixed"
+            sx={{
+              width: { sm: `calc(100% - ${drawerWidth}px)` },
+              ml: { sm: `${drawerWidth}px` },
+            }}
+          >
+            <Toolbar>
+              <IconButton
+                color="inherit"
+                aria-label="open drawer"
+                edge="start"
+                onClick={handleDrawerToggle}
+                sx={{ mr: 2, display: { sm: 'none' } }}
+              >
+                <Menu />
+              </IconButton>
+              <Typography variant="h6" noWrap component="div" sx={{ flexGrow: 1 }}>
+                Professional Rental Management
               </Typography>
-            </Box>
-            <Typography variant="subtitle1" sx={{ mr: 2 }}>
-              {t('appSubtitle')}
-            </Typography>
-            <LanguageCurrencySelector />
-            <IconButton onClick={toggleDarkMode} color="inherit">
-              {darkMode ? <Brightness7 /> : <Brightness4 />}
-            </IconButton>
-          </Toolbar>
-        </AppBar>
-        <Box sx={{ py: 2, px: 3, maxWidth: '100vw', width: '100vw', boxSizing: 'border-box' }}>
-          <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
-            <Tabs value={tabValue} onChange={handleTabChange} aria-label="PropPilot tabs">
-              <Tab label={t('propertyUnits')} />
-              <Tab label={t('registerPayment')} />
-              <Tab label={t('tenants')} />
-            </Tabs>
+              <LanguageCurrencySelector />
+              <IconButton
+                color="inherit"
+                onClick={() => setDarkMode(!darkMode)}
+                sx={{ ml: 1 }}
+              >
+                {darkMode ? <Brightness7 /> : <Brightness4 />}
+              </IconButton>
+            </Toolbar>
+          </AppBar>
+
+          <Box
+            component="nav"
+            sx={{ width: { sm: drawerWidth }, flexShrink: { sm: 0 } }}
+          >
+            <Drawer
+              variant="temporary"
+              open={mobileOpen}
+              onClose={handleDrawerToggle}
+              ModalProps={{
+                keepMounted: true,
+              }}
+              sx={{
+                display: { xs: 'block', sm: 'none' },
+                '& .MuiDrawer-paper': { boxSizing: 'border-box', width: drawerWidth },
+              }}
+            >
+              {drawer}
+            </Drawer>
+            <Drawer
+              variant="permanent"
+              sx={{
+                display: { xs: 'none', sm: 'block' },
+                '& .MuiDrawer-paper': { boxSizing: 'border-box', width: drawerWidth },
+              }}
+              open
+            >
+              {drawer}
+            </Drawer>
           </Box>
-          <TabPanel value={tabValue} index={0}>
-            <PropertyUnitsList />
-          </TabPanel>
-          <TabPanel value={tabValue} index={1}>
-            <PaymentForm />
-          </TabPanel>
-          <TabPanel value={tabValue} index={2}>
-            <TenantsList />
-          </TabPanel>
+
+          <Box
+            component="main"
+            sx={{
+              flexGrow: 1,
+              p: 3,
+              width: { sm: `calc(100% - ${drawerWidth}px)` },
+              mt: '64px',
+              backgroundColor: 'background.default',
+              minHeight: '100vh',
+            }}
+          >
+            <Container maxWidth="xl">
+              {renderContent()}
+            </Container>
+          </Box>
         </Box>
       </LocalizationProvider>
     </ThemeProvider>
